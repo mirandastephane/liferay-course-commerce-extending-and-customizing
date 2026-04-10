@@ -1,4 +1,5 @@
-# liferay-commerce-courses-baseline
+# Extending and Customizing Liferay Commerce
+
 
 This repository contains the baseline for the Commerce Courses
 
