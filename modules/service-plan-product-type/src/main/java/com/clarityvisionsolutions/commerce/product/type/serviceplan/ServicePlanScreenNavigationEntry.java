@@ -1,11 +1,14 @@
 package com.clarityvisionsolutions.commerce.product.type.serviceplan;
 
 import com.liferay.commerce.product.model.CPDefinition;
+import com.liferay.commerce.product.service.CPDefinitionLocalService;
 import com.liferay.commerce.product.servlet.taglib.ui.constants.CPDefinitionScreenNavigationConstants;
+import com.liferay.expando.kernel.service.ExpandoValueLocalService;
 import com.liferay.frontend.taglib.servlet.taglib.ScreenNavigationEntry;
 import com.liferay.frontend.taglib.servlet.taglib.util.JSPRenderer;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 
 import java.io.IOException;
@@ -82,10 +85,34 @@ public class ServicePlanScreenNavigationEntry
 			HttpServletResponse httpServletResponse)
 		throws IOException {
 
+		try {
+			long cpDefinitionId = ParamUtil.getLong(
+				httpServletRequest, "cpDefinitionId");
+
+			if (cpDefinitionId > 0) {
+				CPDefinition cpDefinition =
+					_cpDefinitionLocalService.getCPDefinition(cpDefinitionId);
+
+				httpServletRequest.setAttribute(
+					ServicePlanWebKeys.CP_DEFINITION, cpDefinition);
+			}
+		}
+		catch (Exception e) {
+		}
+
+		httpServletRequest.setAttribute(
+			"expandoValueLocalService", _expandoValueLocalService);
+
 		_jspRenderer.renderJSP(
 			_servletContext, httpServletRequest, httpServletResponse,
 			"/service_plan/edit/definition.jsp");
 	}
+
+	@Reference
+	private CPDefinitionLocalService _cpDefinitionLocalService;
+
+	@Reference
+	private ExpandoValueLocalService _expandoValueLocalService;
 
 	@Reference
 	private JSPRenderer _jspRenderer;

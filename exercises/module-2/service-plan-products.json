@@ -1,0 +1,44 @@
+[
+  {
+    "name": {"en_US": "Clarity Artisan Protection Plan \u2014 Basic"},
+    "externalReferenceCode": "SERVICE-PLAN-BASIC-1YR",
+    "productType": "service-plan",
+    "customFields": [
+      {"customValue": {"data": "12 months"}, "name": "servicePlan_coverageDuration"},
+      {"customValue": {"data": "30 days"}, "name": "servicePlan_gracePeriod"},
+      {"customValue": {"data": "3"}, "name": "servicePlan_maxNumberOfClaims"},
+      {"customValue": {"data": "250.00"}, "name": "servicePlan_maxClaimValue"},
+      {"customValue": {"data": "Repair"}, "name": "servicePlan_replacementMethod"},
+      {"customValue": {"data": "ClearShield Insurance Ltd."}, "name": "servicePlan_underwriter"},
+      {"customValue": {"data": "https://www.clarityvisionsolutions.com/legal/basic-plan-terms"}, "name": "servicePlan_termsUrl"}
+    ]
+  },
+  {
+    "name": {"en_US": "Clarity Artisan Protection Plan \u2014 Standard"},
+    "externalReferenceCode": "SERVICE-PLAN-STANDARD-2YR",
+    "productType": "service-plan",
+    "customFields": [
+      {"customValue": {"data": "24 months"}, "name": "servicePlan_coverageDuration"},
+      {"customValue": {"data": "60 days"}, "name": "servicePlan_gracePeriod"},
+      {"customValue": {"data": "5"}, "name": "servicePlan_maxNumberOfClaims"},
+      {"customValue": {"data": "500.00"}, "name": "servicePlan_maxClaimValue"},
+      {"customValue": {"data": "Repair or Replace"}, "name": "servicePlan_replacementMethod"},
+      {"customValue": {"data": "ClearShield Insurance Ltd."}, "name": "servicePlan_underwriter"},
+      {"customValue": {"data": "https://www.clarityvisionsolutions.com/legal/standard-plan-terms"}, "name": "servicePlan_termsUrl"}
+    ]
+  },
+  {
+    "name": {"en_US": "Clarity Artisan Protection Plan \u2014 Premium"},
+    "externalReferenceCode": "SERVICE-PLAN-PREMIUM-2YR",
+    "productType": "service-plan",
+    "customFields": [
+      {"customValue": {"data": "24 months"}, "name": "servicePlan_coverageDuration"},
+      {"customValue": {"data": "90 days"}, "name": "servicePlan_gracePeriod"},
+      {"customValue": {"data": "Unlimited"}, "name": "servicePlan_maxNumberOfClaims"},
+      {"customValue": {"data": "1000.00"}, "name": "servicePlan_maxClaimValue"},
+      {"customValue": {"data": "Replace"}, "name": "servicePlan_replacementMethod"},
+      {"customValue": {"data": "PrimeGuard Insurance Co."}, "name": "servicePlan_underwriter"},
+      {"customValue": {"data": "https://www.clarityvisionsolutions.com/legal/premium-plan-terms"}, "name": "servicePlan_termsUrl"}
+    ]
+  }
+]
