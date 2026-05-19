@@ -3,6 +3,10 @@
     "name": {"en_US": "Clarity Artisan Protection Plan \u2014 Basic"},
     "externalReferenceCode": "SERVICE-PLAN-BASIC-1YR",
     "productType": "service-plan",
+    "active": true,
+    "categories": [
+      {"externalReferenceCode": "84fdd645-0cbf-aa18-084e-972e227e77ce", "id": 99735, "name": "Services Plan"}
+    ],
     "customFields": [
       {"customValue": {"data": "12 months"}, "name": "servicePlan_coverageDuration"},
       {"customValue": {"data": "30 days"}, "name": "servicePlan_gracePeriod"},
@@ -16,7 +20,12 @@
   {
     "name": {"en_US": "Clarity Artisan Protection Plan \u2014 Standard"},
     "externalReferenceCode": "SERVICE-PLAN-STANDARD-2YR",
+    "catalogExternalReferenceCode": "CLARITY_EYEWEAR",
     "productType": "service-plan",
+    "active": true,
+    "categories": [
+      {"externalReferenceCode": "84fdd645-0cbf-aa18-084e-972e227e77ce", "id": 99735, "name": "Services Plan"}
+    ],
     "customFields": [
       {"customValue": {"data": "24 months"}, "name": "servicePlan_coverageDuration"},
       {"customValue": {"data": "60 days"}, "name": "servicePlan_gracePeriod"},
@@ -30,7 +39,12 @@
   {
     "name": {"en_US": "Clarity Artisan Protection Plan \u2014 Premium"},
     "externalReferenceCode": "SERVICE-PLAN-PREMIUM-2YR",
+    "catalogExternalReferenceCode": "CLARITY_EYEWEAR",
     "productType": "service-plan",
+    "active": true,
+    "categories": [
+      {"externalReferenceCode": "84fdd645-0cbf-aa18-084e-972e227e77ce", "id": 99735, "name": "Services Plan"}
+    ],
     "customFields": [
       {"customValue": {"data": "24 months"}, "name": "servicePlan_coverageDuration"},
       {"customValue": {"data": "90 days"}, "name": "servicePlan_gracePeriod"},
