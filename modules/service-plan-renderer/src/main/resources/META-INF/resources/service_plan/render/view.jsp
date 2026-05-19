@@ -38,6 +38,11 @@ String coverageDuration = GetterUtil.getString(
 		"servicePlan_coverageDuration", _classPK, _defaultValue));
 
 // TODO: Add gracePeriod Expando read here
+String gracePeriod = GetterUtil.getString(
+		expandoValueLocalService.getData(
+				_companyId, _className, ExpandoTableConstants.DEFAULT_TABLE_NAME,
+				"servicePlan_gracePeriod", _classPK, _defaultValue));
+
 
 String maxNumberOfClaims = GetterUtil.getString(
 	expandoValueLocalService.getData(
@@ -45,6 +50,11 @@ String maxNumberOfClaims = GetterUtil.getString(
 		"servicePlan_maxNumberOfClaims", _classPK, _defaultValue));
 
 // TODO: Add maxClaimValue Expando read here
+String maxClaimValue = GetterUtil.getString(
+		expandoValueLocalService.getData(
+				_companyId, _className, ExpandoTableConstants.DEFAULT_TABLE_NAME,
+				"servicePlan_maxClaimValue", _classPK, _defaultValue));
+
 
 String replacementMethod = GetterUtil.getString(
 	expandoValueLocalService.getData(
@@ -75,6 +85,10 @@ String termsUrl = GetterUtil.getString(
 			</tr>
 
 			<%-- TODO: Add Grace Period field here --%>
+			<tr style="border-bottom: 1px solid #dee2e6;">
+				<th style="padding: 8px 4px; font-weight: 500; vertical-align: top; word-wrap: break-word;"><liferay-ui:message key="grace-period" /></th>
+				<td style="padding: 8px 4px; vertical-align: top; word-wrap: break-word;"><%= gracePeriod %></td>
+			</tr>
 
 			<tr style="border-bottom: 1px solid #dee2e6;">
 				<th style="padding: 8px 4px; font-weight: 500; vertical-align: top; word-wrap: break-word;"><liferay-ui:message key="max-number-of-claims" /></th>
@@ -82,6 +96,10 @@ String termsUrl = GetterUtil.getString(
 			</tr>
 
 			<%-- TODO: Add Max Claim Value field here --%>
+			<tr style="border-bottom: 1px solid #dee2e6;">
+				<th style="padding: 8px 4px; font-weight: 500; vertical-align: top; word-wrap: break-word;"><liferay-ui:message key="max-claim-value" /></th>
+				<td style="padding: 8px 4px; vertical-align: top; word-wrap: break-word;"><%= maxClaimValue %></td>
+			</tr>
 
 			<tr style="border-bottom: 1px solid #dee2e6;">
 				<th style="padding: 8px 4px; font-weight: 500; vertical-align: top; word-wrap: break-word;"><liferay-ui:message key="replacement-method" /></th>
