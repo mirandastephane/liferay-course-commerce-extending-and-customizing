@@ -43,8 +43,6 @@ class ServicePlanGuaranteeBadge extends HTMLElement {
 			const coverageDuration = coverageField?.customValue?.data;
 
 			if (coverageDuration) {
-				badgeTitle = coverageDuration;
-
 				// TODO: Add coverage duration mapping here
 
 				badgeTitle = coverageDuration;
@@ -74,7 +72,7 @@ class ServicePlanGuaranteeBadge extends HTMLElement {
 
 				<div class="guarantee-badge__content">
 					<p class="guarantee-badge__title">${badgeTitle}</p>
-					<p class="guarantee-badge__subtitle">Eyewear Service Plan</p>
+					<p class="guarantee-badge__subtitle">Powered by Clarity Protection Group</p>
 				</div>
 			</div>
 		`;

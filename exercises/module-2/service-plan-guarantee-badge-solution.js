@@ -44,9 +44,9 @@ class ServicePlanGuaranteeBadge extends HTMLElement {
 
 			if (coverageDuration) {
 				const durationLabels = {
-					'12 months': '1-Year',
-					'24 months': '2-Year',
-					'36 months': '3-Year',
+					'12 months': '12-Month Protection Plan',
+					'24 months': '24-Month Protection Plan',
+					'Custom': 'Custom Protection Plan',
 				};
 				badgeTitle = durationLabels[coverageDuration] || coverageDuration;
 			}
@@ -75,7 +75,7 @@ class ServicePlanGuaranteeBadge extends HTMLElement {
 
 				<div class="guarantee-badge__content">
 					<p class="guarantee-badge__title">${badgeTitle}</p>
-					<p class="guarantee-badge__subtitle">Eyewear Service Plan</p>
+					<p class="guarantee-badge__subtitle">Powered by Clarity Protection Group</p>
 				</div>
 			</div>
 		`;

@@ -11,9 +11,31 @@
             cpDefinition.getCPDefinitionId(),
             (String)null));
 
-    Field display example:
+    Select field:
+    <aui:select label="field-key" name="fieldVariable" value="<%= fieldVariable %>">
+        <aui:option label="Option A" value="Option A" />
+        <aui:option label="Option B" value="Option B" />
+    </aui:select>
+
+    Integer field:
     <aui:input
-        disabled="<%= true %>"
+        label="field-key"
+        name="fieldVariable"
+        type="number"
+        value="<%= fieldVariable %>"
+    />
+
+    Decimal field:
+    <aui:input
+        label="field-key"
+        name="fieldVariable"
+        step="0.01"
+        type="number"
+        value="<%= fieldVariable %>"
+    />
+
+    Text field:
+    <aui:input
         label="field-key"
         name="fieldVariable"
         type="text"
@@ -42,6 +64,8 @@ String coverageDuration = GetterUtil.getString(
         cpDefinition.getCPDefinitionId(),
         _defaultValue));
 
+// TODO: Add gracePeriod Expando read here
+
 String maxNumberOfClaims = GetterUtil.getString(
     expandoValueLocalService.getData(
         themeDisplay.getCompanyId(),
@@ -50,6 +74,8 @@ String maxNumberOfClaims = GetterUtil.getString(
         "servicePlan_maxNumberOfClaims",
         cpDefinition.getCPDefinitionId(),
         _defaultValue));
+
+// TODO: Add maxClaimValue Expando read here
 
 String replacementMethod = GetterUtil.getString(
     expandoValueLocalService.getData(
@@ -86,53 +112,47 @@ String termsUrl = GetterUtil.getString(
 <aui:form action="<%= editServicePlanURL %>" method="post" name="fm">
     <aui:input name="cpDefinitionId" type="hidden" value="<%= cpDefinition.getCPDefinitionId() %>" />
 
-    <aui:fieldset>
-        <aui:input
-            disabled="<%= true %>"
-            label="coverage-duration"
-            name="coverageDuration"
-            type="text"
-            value="<%= coverageDuration %>"
-        />
+    <div class="sheet">
+        <div class="panel-group panel-group-flush">
+            <aui:fieldset label="service-plan-settings">
+                <aui:select label="coverage-duration" name="coverageDuration" value="<%= coverageDuration %>">
+                    <aui:option label="12 months" value="12 months" />
+                    <aui:option label="24 months" value="24 months" />
+                    <aui:option label="36 months" value="36 months" />
+                    <aui:option label="Custom" value="Custom" />
+                </aui:select>
 
-        <%-- TODO: Add Grace Period field here --%>
+                <%-- TODO: Add Grace Period field here --%>
 
-        <aui:input
-            disabled="<%= true %>"
-            label="max-number-of-claims"
-            name="maxNumberOfClaims"
-            type="text"
-            value="<%= maxNumberOfClaims %>"
-        />
+                <aui:input
+                    label="max-number-of-claims"
+                    name="maxNumberOfClaims"
+                    type="text"
+                    value="<%= maxNumberOfClaims %>"
+                />
 
-        <%-- TODO: Add Max Claim Value field here --%>
+                <%-- TODO: Add Max Claim Value field here --%>
 
-        <aui:input
-            disabled="<%= true %>"
-            label="replacement-method"
-            name="replacementMethod"
-            type="text"
-            value="<%= replacementMethod %>"
-        />
+                <aui:select label="replacement-method" name="replacementMethod" value="<%= replacementMethod %>">
+                    <aui:option label="Repair" value="Repair" />
+                    <aui:option label="Repair or Replace" value="Repair or Replace" />
+                    <aui:option label="Replace" value="Replace" />
+                </aui:select>
 
-        <aui:input
-            disabled="<%= true %>"
-            label="underwriter"
-            name="underwriter"
-            type="text"
-            value="<%= underwriter %>"
-        />
+                <aui:input
+                    label="underwriter"
+                    name="underwriter"
+                    type="text"
+                    value="<%= underwriter %>"
+                />
 
-        <aui:input
-            disabled="<%= true %>"
-            label="terms-url"
-            name="termsUrl"
-            type="text"
-            value="<%= termsUrl %>"
-        />
-    </aui:fieldset>
-
-    <aui:button-row>
-        <aui:button type="submit" />
-    </aui:button-row>
+                <aui:input
+                    label="terms-url"
+                    name="termsUrl"
+                    type="text"
+                    value="<%= termsUrl %>"
+                />
+            </aui:fieldset>
+        </div>
+    </div>
 </aui:form>

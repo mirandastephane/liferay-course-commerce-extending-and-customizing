@@ -2,8 +2,10 @@
   {
     "name": {"en_US": "Clarity Artisan Protection Plan \u2014 Basic"},
     "externalReferenceCode": "SERVICE-PLAN-BASIC-1YR",
+    "catalogExternalReferenceCode": "CLARITY_EYEWEAR",
     "productType": "service-plan",
     "active": true,
+    "neverExpire": true,
     "categories": [
       {"externalReferenceCode": "149e2c02-d85a-99c4-959f-0678ed79f1b4", "id": 99735, "name": "Service Plan"}
     ],
@@ -23,6 +25,7 @@
     "catalogExternalReferenceCode": "CLARITY_EYEWEAR",
     "productType": "service-plan",
     "active": true,
+    "neverExpire": true,
     "categories": [
       {"externalReferenceCode": "149e2c02-d85a-99c4-959f-0678ed79f1b4", "id": 99735, "name": "Service Plan"}
     ],
@@ -42,6 +45,7 @@
     "catalogExternalReferenceCode": "CLARITY_EYEWEAR",
     "productType": "service-plan",
     "active": true,
+    "neverExpire": true,
     "categories": [
       {"externalReferenceCode": "149e2c02-d85a-99c4-959f-0678ed79f1b4", "id": 99735, "name": "Service Plan"}
     ],
