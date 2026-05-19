@@ -5,7 +5,7 @@
     "productType": "service-plan",
     "active": true,
     "categories": [
-      {"externalReferenceCode": "84fdd645-0cbf-aa18-084e-972e227e77ce", "id": 99735, "name": "Services Plan"}
+      {"externalReferenceCode": "149e2c02-d85a-99c4-959f-0678ed79f1b4", "id": 99735, "name": "Service Plan"}
     ],
     "customFields": [
       {"customValue": {"data": "12 months"}, "name": "servicePlan_coverageDuration"},
@@ -24,7 +24,7 @@
     "productType": "service-plan",
     "active": true,
     "categories": [
-      {"externalReferenceCode": "84fdd645-0cbf-aa18-084e-972e227e77ce", "id": 99735, "name": "Services Plan"}
+      {"externalReferenceCode": "149e2c02-d85a-99c4-959f-0678ed79f1b4", "id": 99735, "name": "Service Plan"}
     ],
     "customFields": [
       {"customValue": {"data": "24 months"}, "name": "servicePlan_coverageDuration"},
@@ -43,7 +43,7 @@
     "productType": "service-plan",
     "active": true,
     "categories": [
-      {"externalReferenceCode": "84fdd645-0cbf-aa18-084e-972e227e77ce", "id": 99735, "name": "Services Plan"}
+      {"externalReferenceCode": "149e2c02-d85a-99c4-959f-0678ed79f1b4", "id": 99735, "name": "Service Plan"}
     ],
     "customFields": [
       {"customValue": {"data": "24 months"}, "name": "servicePlan_coverageDuration"},
