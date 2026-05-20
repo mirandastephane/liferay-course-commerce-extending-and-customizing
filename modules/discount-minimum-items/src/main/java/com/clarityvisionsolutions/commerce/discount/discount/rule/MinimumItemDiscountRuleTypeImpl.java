@@ -1,4 +1,4 @@
-package com.acme.m6a8.web.internal.commerce.discount.rule.type;
+package com.clarityvisionsolutions.commerce.discount.discount.rule;
 
 import com.liferay.commerce.context.CommerceContext;
 import com.liferay.commerce.discount.model.CommerceDiscountRule;
@@ -18,12 +18,12 @@ import org.osgi.service.component.annotations.Component;
 
 @Component(
 	property = {
-		"commerce.discount.rule.type.key=m6a8",
-		"commerce.discount.rule.type.order:Integer=51"
+		"commerce.discount.rule.type.key=minimum-nbr-items",
+		"commerce.discount.rule.type.order:Integer=50"
 	},
 	service = CommerceDiscountRuleType.class
 )
-public class M6A8CommerceDiscountRuleTypeImpl
+public class MinimumItemDiscountRuleTypeImpl
 	implements CommerceDiscountRuleType {
 
 	@Override
@@ -54,7 +54,7 @@ public class M6A8CommerceDiscountRuleTypeImpl
 
 	@Override
 	public String getKey() {
-		return "m6a8";
+		return "minimum-nbr-items";
 	}
 
 	@Override

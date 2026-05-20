@@ -1,4 +1,4 @@
-package com.acme.m6a8.web.internal.commerce.discount.rule.type;
+package com.clarityvisionsolutions.commerce.discount.discount.rule;
 
 import com.liferay.commerce.discount.rule.type.CommerceDiscountRuleTypeJSPContributor;
 import com.liferay.frontend.taglib.servlet.taglib.util.JSPRenderer;
@@ -11,10 +11,10 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 @Component(
-	property = "commerce.discount.rule.type.jsp.contributor.key=m6a8",
+	property = "commerce.discount.rule.type.jsp.contributor.key=minimum-nbr-items",
 	service = CommerceDiscountRuleTypeJSPContributor.class
 )
-public class M6A8CommerceDiscountRuleTypeJSPContributor
+public class MinimumItemDiscountRuleTypeJSPContributor
 	implements CommerceDiscountRuleTypeJSPContributor {
 
 	@Override
@@ -32,7 +32,7 @@ public class M6A8CommerceDiscountRuleTypeJSPContributor
 	@Reference
 	private JSPRenderer _jspRenderer;
 
-	@Reference(target = "(osgi.web.symbolicname=com.acme.m6a8.web)")
+	@Reference(target = "(osgi.web.symbolicname=com.clarityvisionsolutions.commerce.discount.bulk)")
 	private ServletContext _servletContext;
 
 }
