@@ -1,4 +1,4 @@
-package com.clarityvisionsolutions.commerce.discount.discount.rule;
+package com.clarityvisionsolutions.commerce.discount.rule;
 
 import com.liferay.commerce.discount.rule.type.CommerceDiscountRuleTypeJSPContributor;
 import com.liferay.frontend.taglib.servlet.taglib.util.JSPRenderer;

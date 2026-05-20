@@ -1,6 +1,15 @@
 <%@ taglib uri="http://liferay.com/tld/aui" prefix="aui" %>
+<%--
+    SYNTAX REFERENCE: Copy and adapt for the TODO sections below.
 
-<aui:input label="minimum-number-of-items" name="typeSettings" type="text" disabled="false" value="">
-	<aui:validator name="digits" />
-	<aui:validator name="min">1</aui:validator>
-</aui:input>
+    Field display example:
+    <aui:input
+        disabled=false"
+        label="field-key"
+        name="fieldVariable"
+        type="text"
+        value="">
+        <aui:validator name="validator-name" />
+    </aui:input
+--%>
+<%-- TODO: Add Minimum Number of Items field here --%>

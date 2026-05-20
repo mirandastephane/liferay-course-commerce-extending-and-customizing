@@ -1,4 +1,4 @@
-package com.clarityvisionsolutions.commerce.discount.discount.rule;
+package com.clarityvisionsolutions.commerce.discount.rule;
 
 import com.liferay.commerce.context.CommerceContext;
 import com.liferay.commerce.discount.model.CommerceDiscountRule;
@@ -18,8 +18,8 @@ import org.osgi.service.component.annotations.Component;
 
 @Component(
 	property = {
-		"commerce.discount.rule.type.key=minimum-nbr-items",
-		"commerce.discount.rule.type.order:Integer=50"
+		"commerce.discount.rule.type.key=",
+		"commerce.discount.rule.type.order:Integer="
 	},
 	service = CommerceDiscountRuleType.class
 )
@@ -41,9 +41,7 @@ public class MinimumItemDiscountRuleTypeImpl
 		List<CommerceOrderItem> commerceOrderItems =
 			commerceOrder.getCommerceOrderItems();
 
-		int mininumNumberOfItems = GetterUtil.getInteger(
-			commerceDiscountRule.getSettingsProperty(
-				commerceDiscountRule.getType()));
+		<%-- TODO: Add business logic for Discount Rule here --%>
 
 		if (commerceOrderItems.size() >= mininumNumberOfItems) {
 			return true;
@@ -62,8 +60,10 @@ public class MinimumItemDiscountRuleTypeImpl
 		ResourceBundle resourceBundle = ResourceBundleUtil.getBundle(
 			"content.Language", locale, getClass());
 
-		return LanguageUtil.get(
-			resourceBundle, "has-a-minimum-number-of-items");
+		<%-- TODO: Add Resource Key for "has-a-minimum-number-of-items" here --%> 
+		/*return LanguageUtil.get(
+			resourceBundle, "resource-key");
+		*/
 	}
 
 	@Override
