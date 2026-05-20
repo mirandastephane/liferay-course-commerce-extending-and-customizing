@@ -7,7 +7,7 @@ String typeSettings = (String)request.getAttribute("view.jsp-minimumItemsDiscoun
 
     Field display example:
     <aui:input
-        disabled=false"
+        disabled="false"
         label="field-key"
         name="fieldVariable"
         type="text"
