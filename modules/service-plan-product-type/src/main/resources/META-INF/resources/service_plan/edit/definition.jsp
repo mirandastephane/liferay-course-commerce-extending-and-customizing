@@ -46,11 +46,11 @@
 <%@ include file="/init.jsp" %>
 
 <%
-CPDefinition cpDefinition = (CPDefinition)renderRequest.getAttribute(
+CPDefinition cpDefinition = (CPDefinition)request.getAttribute(
     ServicePlanWebKeys.CP_DEFINITION);
 
 ExpandoValueLocalService expandoValueLocalService =
-    (ExpandoValueLocalService)renderRequest.getAttribute(
+    (ExpandoValueLocalService)request.getAttribute(
         "expandoValueLocalService");
 
 String _defaultValue = null;

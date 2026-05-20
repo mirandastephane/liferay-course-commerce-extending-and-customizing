@@ -14,4 +14,3 @@
 
 <liferay-theme:defineObjects />
 <liferay-frontend:defineObjects />
-<portlet:defineObjects />
