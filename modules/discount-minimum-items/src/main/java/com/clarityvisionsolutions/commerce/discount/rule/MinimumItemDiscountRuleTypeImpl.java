@@ -10,6 +10,7 @@ import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -25,7 +26,7 @@ import org.osgi.service.component.annotations.Component;
 )
 public class MinimumItemDiscountRuleTypeImpl
 	implements CommerceDiscountRuleType {
-
+	
 	@Override
 	public boolean evaluate(
 			CommerceDiscountRule commerceDiscountRule,
@@ -40,10 +41,12 @@ public class MinimumItemDiscountRuleTypeImpl
 
 		List<CommerceOrderItem> commerceOrderItems =
 			commerceOrder.getCommerceOrderItems();
+		
+		BigDecimal orderItemsQuantity = BigDecimal.ZERO;
 
 		<%-- TODO: Add business logic for Discount Rule here --%>
-
-		if (commerceOrderItems.size() >= mininumNumberOfItems) {
+		
+		if (result > 0) {
 			return true;
 		}
 
@@ -64,6 +67,7 @@ public class MinimumItemDiscountRuleTypeImpl
 		/*return LanguageUtil.get(
 			resourceBundle, "resource-key");
 		*/
+		
 	}
 
 	@Override

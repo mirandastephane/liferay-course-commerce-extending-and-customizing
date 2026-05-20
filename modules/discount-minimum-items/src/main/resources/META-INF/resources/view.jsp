@@ -1,4 +1,7 @@
 <%@ taglib uri="http://liferay.com/tld/aui" prefix="aui" %>
+<%
+String typeSettings = (String)request.getAttribute("view.jsp-minimumItemsDiscountRule");
+%>
 <%--
     SYNTAX REFERENCE: Copy and adapt for the TODO sections below.
 
