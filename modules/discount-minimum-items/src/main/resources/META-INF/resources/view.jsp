@@ -13,6 +13,6 @@ String typeSettings = (String)request.getAttribute("view.jsp-minimumItemsDiscoun
         type="text"
         value="">
         <aui:validator name="validator-name" />
-    </aui:input
+    </aui:input>
 --%>
 <%-- TODO: Add Minimum Number of Items field here --%>
