@@ -1,0 +1,4 @@
+Bundle-Name: Clarity Bulk Eligibility Discount
+Bundle-SymbolicName: com.clarityvisionsolutions.commerce.discount.bulk
+Bundle-Version: 1.0.0
+Web-ContextPath: /min-item-web
