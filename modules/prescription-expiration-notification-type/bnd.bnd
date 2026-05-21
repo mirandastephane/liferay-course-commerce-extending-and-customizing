@@ -1,0 +1,4 @@
+Bundle-Name: Clarity Prescription Expiration Notification Type
+Bundle-SymbolicName: com.clarityvisionsolutions.commerce.notification.type.prescription
+Bundle-Version: 1.0.0
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version>=21))"
