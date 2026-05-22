@@ -1,0 +1,5 @@
+Bundle-Name: Clarity Service Plan Product Renderer
+Bundle-SymbolicName: com.clarityvisionsolutions.commerce.product.renderer.serviceplan
+Bundle-Version: 1.0.0
+Web-ContextPath: /service-plan-renderer
+Import-Package: !javax.servlet*,*

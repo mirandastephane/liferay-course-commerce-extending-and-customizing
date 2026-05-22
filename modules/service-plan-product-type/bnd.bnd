@@ -1,0 +1,5 @@
+Bundle-Name: Clarity Service Plan Product Type
+Bundle-SymbolicName: com.clarityvisionsolutions.commerce.product.type.serviceplan
+Bundle-Version: 1.0.0
+Web-ContextPath: /service-plan-product-type
+Import-Package: !javax.servlet*,*

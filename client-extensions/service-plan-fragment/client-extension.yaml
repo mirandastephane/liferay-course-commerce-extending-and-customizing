@@ -1,0 +1,15 @@
+assemble:
+    - from: assets
+      into: static
+
+service-plan-guarantee-badge:
+    cssURLs:
+        - service-plan-guarantee-badge/index.css
+    htmlElementName: service-plan-guarantee-badge
+    instanceable: false
+    name: Service Plan Guarantee Badge
+    portletCategoryName: category.remote-apps
+    type: customElement
+    urls:
+        - service-plan-guarantee-badge/index.js
+    useESM: true
