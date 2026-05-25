@@ -3,15 +3,17 @@ package com.clarityvisionsolutions.commerce.notification.type.listener;
 import com.clarityvisionsolutions.commerce.notification.type.type.PrescriptionExpirationNotificationType;
 import com.liferay.account.model.AccountEntry;
 import com.liferay.account.model.AccountEntryUserRel;
+import com.liferay.account.service.AccountEntryLocalService;
 import com.liferay.account.service.AccountEntryUserRelLocalService;
-import com.liferay.expando.kernel.model.ExpandoTableConstants;
-import com.liferay.expando.kernel.service.ExpandoValueLocalService;
+import com.liferay.expando.kernel.model.ExpandoColumn;
+import com.liferay.expando.kernel.model.ExpandoTable;
+import com.liferay.expando.kernel.model.ExpandoValue;
+import com.liferay.expando.kernel.service.ExpandoColumnLocalService;
+import com.liferay.expando.kernel.service.ExpandoTableLocalService;
 import com.liferay.notification.context.NotificationContext;
 import com.liferay.notification.context.NotificationContextBuilder;
 import com.liferay.notification.model.NotificationTemplate;
 import com.liferay.notification.service.NotificationTemplateLocalService;
-import com.liferay.portal.kernel.dao.orm.DynamicQuery;
-import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
 import com.liferay.portal.kernel.exception.ModelListenerException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -37,39 +39,44 @@ import org.osgi.service.component.annotations.Reference;
  * This prevents re-firing if the status is later updated while already at
  * "Expiring Soon", or when the account moves from "Expiring Soon" to "Expired".
  *
- * Both originalEntry and updatedEntry Expando values are read using the
- * ExpandoValueLocalService directly (NOT expandoBridge.getAttribute()) to
- * ensure consistent read semantics across the transaction boundary.
+ * Listens on ExpandoValue rather than AccountEntry because the Headless API
+ * updates Expando rows before touching AccountEntry, so an AccountEntry
+ * ModelListener always sees the post-update Expando value for both old and new.
+ * The ExpandoValue listener receives the genuine pre/post values via
+ * originalValue and updatedValue.
  */
 @Component(
 	service = ModelListener.class
 )
 public class PrescriptionStatusModelListener
-	extends BaseModelListener<AccountEntry> {
+	extends BaseModelListener<ExpandoValue> {
 
 	@Override
 	public void onAfterUpdate(
-			AccountEntry originalEntry, AccountEntry updatedEntry)
+			ExpandoValue originalValue, ExpandoValue updatedValue)
 		throws ModelListenerException {
 
 		try {
-			String oldStatus = GetterUtil.getString(
-				_expandoValueLocalService.getData(
-					originalEntry.getCompanyId(),
-					AccountEntry.class.getName(),
-					ExpandoTableConstants.DEFAULT_TABLE_NAME,
-					"prescriptionStatus",
-					originalEntry.getAccountEntryId(),
-					""));
+			ExpandoColumn column = _expandoColumnLocalService.fetchExpandoColumn(
+				updatedValue.getColumnId());
 
-			String newStatus = GetterUtil.getString(
-				_expandoValueLocalService.getData(
-					updatedEntry.getCompanyId(),
-					AccountEntry.class.getName(),
-					ExpandoTableConstants.DEFAULT_TABLE_NAME,
-					"prescriptionStatus",
-					updatedEntry.getAccountEntryId(),
-					""));
+			if ((column == null) ||
+				!"prescriptionStatus".equals(column.getName())) {
+
+				return;
+			}
+
+			ExpandoTable table = _expandoTableLocalService.fetchExpandoTable(
+				updatedValue.getTableId());
+
+			if ((table == null) ||
+				!AccountEntry.class.getName().equals(table.getClassName())) {
+
+				return;
+			}
+
+			String oldStatus = GetterUtil.getString(originalValue.getData());
+			String newStatus = GetterUtil.getString(updatedValue.getData());
 
 			if (!"Expiring Soon".equals(newStatus) ||
 				"Expiring Soon".equals(oldStatus)) {
@@ -82,11 +89,22 @@ public class PrescriptionStatusModelListener
 					"PrescriptionStatusModelListener: prescriptionStatus " +
 						"transitioned from \"" + oldStatus + "\" to \"" +
 						newStatus + "\" for accountEntryId=" +
-						updatedEntry.getAccountEntryId() +
+						updatedValue.getClassPK() +
 						" — dispatching notification");
 			}
 
-			_sendNotification(updatedEntry);
+			AccountEntry accountEntry = _accountEntryLocalService.fetchAccountEntry(
+				updatedValue.getClassPK());
+
+			if (accountEntry == null) {
+				_log.warn(
+					"PrescriptionStatusModelListener: AccountEntry not found " +
+						"for accountEntryId=" + updatedValue.getClassPK());
+
+				return;
+			}
+
+			_sendNotification(accountEntry);
 		}
 		catch (Exception exception) {
 			throw new ModelListenerException(exception);
@@ -94,23 +112,9 @@ public class PrescriptionStatusModelListener
 	}
 
 	private NotificationTemplate _findNotificationTemplate(long companyId) {
-		DynamicQuery dynamicQuery =
-			_notificationTemplateLocalService.dynamicQuery();
-
-		dynamicQuery.add(
-			RestrictionsFactoryUtil.eq("companyId", companyId));
-		dynamicQuery.add(
-			RestrictionsFactoryUtil.eq(
-				"type", PrescriptionExpirationNotificationType.TYPE_KEY));
-
-		List<NotificationTemplate> notificationTemplates =
-			_notificationTemplateLocalService.dynamicQuery(dynamicQuery);
-
-		if (notificationTemplates.isEmpty()) {
-			return null;
-		}
-
-		return notificationTemplates.get(0);
+		return _notificationTemplateLocalService
+			.fetchNotificationTemplateByExternalReferenceCode(
+				"prescription-expiration-alert", companyId);
 	}
 
 	private void _sendNotification(AccountEntry accountEntry)
@@ -124,10 +128,8 @@ public class PrescriptionStatusModelListener
 		if (notificationTemplate == null) {
 			_log.warn(
 				"PrescriptionStatusModelListener: no notification template " +
-					"found for type \"" +
-					PrescriptionExpirationNotificationType.TYPE_KEY +
-					"\" in companyId=" + companyId +
-					" — skipping notification");
+					"found with ERC \"prescription-expiration-alert\" in " +
+					"companyId=" + companyId + " — skipping notification");
 
 			return;
 		}
@@ -174,10 +176,16 @@ public class PrescriptionStatusModelListener
 		PrescriptionStatusModelListener.class);
 
 	@Reference
+	private AccountEntryLocalService _accountEntryLocalService;
+
+	@Reference
 	private AccountEntryUserRelLocalService _accountEntryUserRelLocalService;
 
 	@Reference
-	private ExpandoValueLocalService _expandoValueLocalService;
+	private ExpandoColumnLocalService _expandoColumnLocalService;
+
+	@Reference
+	private ExpandoTableLocalService _expandoTableLocalService;
 
 	@Reference
 	private NotificationTemplateLocalService _notificationTemplateLocalService;

@@ -28,3 +28,6 @@
 /plugins-sdk/dist
 /plugins-sdk/lib
 test-results
+
+# Compiled class files (e.g. leftovers from jar xf inspection)
+*.class

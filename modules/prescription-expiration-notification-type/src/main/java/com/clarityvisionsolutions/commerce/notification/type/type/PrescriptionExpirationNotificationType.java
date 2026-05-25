@@ -1,19 +1,26 @@
 package com.clarityvisionsolutions.commerce.notification.type.type;
 
-import com.liferay.account.model.AccountEntryUserRel;
-import com.liferay.account.service.AccountEntryUserRelLocalService;
 import com.liferay.mail.kernel.model.MailMessage;
 import com.liferay.mail.kernel.service.MailService;
 import com.liferay.notification.context.NotificationContext;
 import com.liferay.notification.model.NotificationRecipientSetting;
 import com.liferay.notification.model.NotificationTemplate;
+import com.liferay.notification.service.NotificationQueueEntryLocalService;
+import com.liferay.notification.service.NotificationRecipientLocalService;
+import com.liferay.notification.service.NotificationRecipientSettingLocalService;
+import com.liferay.notification.term.evaluator.NotificationTermEvaluatorTracker;
 import com.liferay.notification.type.BaseNotificationType;
 import com.liferay.notification.type.NotificationType;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.service.RoleLocalService;
+import com.liferay.portal.kernel.service.UserGroupLocalService;
+import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
 
 import jakarta.mail.internet.InternetAddress;
@@ -36,61 +43,36 @@ import org.osgi.service.component.annotations.Reference;
  *       return TYPE_KEY;
  *   }
  *
- * Pattern 2 — Resolving a recipient from an account ID:
+ * Pattern 2 — Resolving a recipient from a role name:
  *
- *   long accountEntryId = GetterUtil.getLong(setting.getValue());
+ *   long companyId = notificationContext.getCompanyId();
  *
- *   List<AccountEntryUserRel> rels =
- *       _accountEntryUserRelLocalService
- *           .getAccountEntryUserRelsByAccountEntryId(accountEntryId);
+ *   Role role = _roleLocalService.fetchRole(companyId, "Role Name");
  *
- *   if (!rels.isEmpty()) {
- *       User user = userLocalService.fetchUser(
- *           rels.get(0).getAccountUserId());
+ *   if (role != null) {
+ *       List<User> users = userLocalService.getRoleUsers(role.getRoleId());
  *
- *       if (user != null) {
- *           return new Object[] {user.getEmailAddress()};
+ *       if (!users.isEmpty()) {
+ *           return new Object[] {users.get(0).getEmailAddress()};
  *       }
  *   }
  *
  *   return new Object[0];
  */
 
-/**
- * Custom notification type that delivers prescription expiration alerts
- * via email when an account's prescriptionStatus Custom Field transitions
- * to "Expiring Soon".
- *
- * Registration: property "notification.type.key" identifies this type in the
- * Notification Templates UI and routes notifications dispatched with
- * TYPE_KEY to this handler.
- *
- * DO NOT MODIFY sendNotification() or evaluateNotificationRecipientSettings()
- * — those are pre-configured infrastructure. Your exercise tasks are:
- *   TODO 1 — implement getType()
- *   TODO 2 — implement toRecipients()
- */
 @Component(
 	property = "notification.type.key=" + PrescriptionExpirationNotificationType.TYPE_KEY,
-	service = NotificationType.class
+	service = {NotificationType.class, PrescriptionExpirationNotificationType.class}
 )
 public class PrescriptionExpirationNotificationType
 	extends BaseNotificationType {
 
 	public static final String TYPE_KEY = "prescription-expiration";
 
-	/**
-	 * Returns the unique key that identifies this notification type.
-	 * Used by the Notification Templates UI and by the framework to route
-	 * notifications to the correct handler.
-	 *
-	 * TODO 1: Return the unique key for this notification type.
-	 * Hint: return the TYPE_KEY constant defined above.
-	 */
 	@Override
 	public String getType() {
 
-		// TODO 1: Return the unique key for this notification type
+		// TODO 1: Return the TYPE_KEY constant.
 
 		return "";
 	}
@@ -100,17 +82,6 @@ public class PrescriptionExpirationNotificationType
 		return TYPE_KEY;
 	}
 
-	/**
-	 * Maps the "accountId" recipient setting from the notification context's
-	 * term values. The value under key "id" in termValues is the
-	 * AccountEntry's primary key, stored as a String.
-	 *
-	 * This map is consumed by createNotificationRecipientSettings() to build
-	 * the in-memory NotificationRecipientSetting list, which is later passed
-	 * to toRecipients() for email resolution.
-	 *
-	 * PRE-CONFIGURED — do not modify.
-	 */
 	@Override
 	public Map<String, String> evaluateNotificationRecipientSettings(
 			long companyId, NotificationContext notificationContext,
@@ -118,80 +89,25 @@ public class PrescriptionExpirationNotificationType
 		throws PortalException {
 
 		return Collections.singletonMap(
-			"accountId",
-			String.valueOf(GetterUtil.getLong(termValues.get("id"))));
+			"companyId", String.valueOf(companyId));
 	}
 
-	/**
-	 * Declares "accountId" as the only allowed recipient setting name.
-	 * Used by validateNotificationTemplate() to guard against unknown
-	 * settings being stored on a template.
-	 *
-	 * PRE-CONFIGURED — do not modify.
-	 */
 	@Override
 	public Set<String> getAllowedNotificationRecipientSettingsNames() {
-		return Collections.singleton("accountId");
+		return Collections.singleton("companyId");
 	}
 
-	/**
-	 * Resolves the email address(es) to which the notification should be sent.
-	 *
-	 * The settings list contains one entry with name="accountId" and
-	 * value=<accountEntryId> (a String). Use that ID to look up the account's
-	 * primary user via AccountEntryUserRelLocalService, then fetch the User
-	 * from UserLocalService and return their email address.
-	 *
-	 * TODO 2: Resolve the recipient's email from the account ID.
-	 *   1. Iterate notificationRecipientSettings to find the setting whose
-	 *      name equals "accountId".
-	 *   2. Parse the accountEntryId with GetterUtil.getLong(setting.getValue()).
-	 *   3. Call _accountEntryUserRelLocalService
-	 *          .getAccountEntryUserRelsByAccountEntryId(accountEntryId)
-	 *      to obtain the list of account-user relations.
-	 *   4. If the list is non-empty, fetch the first user with
-	 *      userLocalService.fetchUser(rels.get(0).getAccountUserId()).
-	 *   5. If the user is non-null, return new Object[] {user.getEmailAddress()}.
-	 *   6. Otherwise return new Object[0].
-	 */
 	@Override
 	public Object[] toRecipients(
 		List<NotificationRecipientSetting> notificationRecipientSettings) {
 
-		for (NotificationRecipientSetting setting :
-				notificationRecipientSettings) {
-
-			if ("accountId".equals(setting.getName())) {
-
-				// TODO 2: Resolve the recipient's email from the account ID
-				// Use _accountEntryUserRelLocalService to get the account's users,
-				// then use userLocalService to fetch the first user,
-				// and return an array containing the user's email address.
-
-				return new Object[0];
-			}
-		}
+		// TODO 2: Look up the "Operations Manager" role by companyId.
+		// Return the email address of the first role member as a single-element
+		// Object array, or new Object[0] if the role has no members.
 
 		return new Object[0];
 	}
 
-	/**
-	 * Orchestrates the full email delivery pipeline for one notification.
-	 *
-	 * Flow:
-	 *  1. Set siteDefaultLocale (required before formatLocalizedContent).
-	 *  2. Stamp TYPE_KEY on the context so NotificationTermEvaluatorTracker
-	 *     routes term evaluation to our evaluator via class.name lookup.
-	 *  3. Format body/subject — evaluates all [%TERM%] variables.
-	 *  4. Build the "accountId" recipient settings map.
-	 *  5. Create in-memory NotificationRecipientSetting list.
-	 *  6. Wire the queue entry, recipient, and settings onto the context
-	 *     via prepareNotificationContext.
-	 *  7. Resolve email address(es) via toRecipients().
-	 *  8. Send one MailMessage per recipient via MailService.
-	 *
-	 * PRE-CONFIGURED — do not modify.
-	 */
 	@Override
 	public void sendNotification(NotificationContext notificationContext)
 		throws PortalException {
@@ -227,11 +143,8 @@ public class PrescriptionExpirationNotificationType
 			return;
 		}
 
-		List<NotificationRecipientSetting> internalSettings =
-			createNotificationRecipientSettings(user, 0, recipientSettingsMap);
-
 		prepareNotificationContext(
-			user, body, notificationContext, internalSettings, subject);
+			user, body, notificationContext, recipientSettingsMap, subject);
 
 		Object[] recipients = toRecipients(
 			notificationContext.getNotificationRecipientSettings());
@@ -275,13 +188,66 @@ public class PrescriptionExpirationNotificationType
 		}
 	}
 
+	// Redeclare @Reference for inherited protected fields from BaseNotificationType.
+	// OSGi DS does not process @Reference annotations from superclasses in
+	// external bundles — they must be re-wired explicitly in the concrete component.
+
+	@Reference
+	protected void setNotificationQueueEntryLocalService(
+		NotificationQueueEntryLocalService notificationQueueEntryLocalService) {
+
+		this.notificationQueueEntryLocalService =
+			notificationQueueEntryLocalService;
+	}
+
+	@Reference
+	protected void setNotificationRecipientLocalService(
+		NotificationRecipientLocalService notificationRecipientLocalService) {
+
+		this.notificationRecipientLocalService =
+			notificationRecipientLocalService;
+	}
+
+	@Reference
+	protected void setNotificationRecipientSettingLocalService(
+		NotificationRecipientSettingLocalService
+			notificationRecipientSettingLocalService) {
+
+		this.notificationRecipientSettingLocalService =
+			notificationRecipientSettingLocalService;
+	}
+
+	@Reference
+	protected void setNotificationTermEvaluatorTracker(
+		NotificationTermEvaluatorTracker notificationTermEvaluatorTracker) {
+
+		this.notificationTermEvaluatorTracker = notificationTermEvaluatorTracker;
+	}
+
+	@Reference
+	protected void setPortal(Portal portal) {
+		this.portal = portal;
+	}
+
+	@Reference
+	protected void setUserGroupLocalService(
+		UserGroupLocalService userGroupLocalService) {
+
+		this.userGroupLocalService = userGroupLocalService;
+	}
+
+	@Reference
+	protected void setUserLocalService(UserLocalService userLocalService) {
+		this.userLocalService = userLocalService;
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		PrescriptionExpirationNotificationType.class);
 
 	@Reference
-	private AccountEntryUserRelLocalService _accountEntryUserRelLocalService;
+	private MailService _mailService;
 
 	@Reference
-	private MailService _mailService;
+	private RoleLocalService _roleLocalService;
 
 }
