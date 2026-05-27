@@ -1,0 +1,4 @@
+Bundle-Name: Clarity Custom Minimum Qty Order Rule
+Bundle-SymbolicName: com.clarityvisionsolutions.commerce.order.rule.min
+Bundle-Version: 1.0.0
+Web-ContextPath: /order-rule-min-impl
