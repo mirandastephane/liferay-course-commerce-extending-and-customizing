@@ -45,15 +45,22 @@ import org.osgi.service.component.annotations.Reference;
  *
  * Pattern 2 — Resolving a recipient from a role name:
  *
- *   long companyId = notificationContext.getCompanyId();
+ *   for (NotificationRecipientSetting setting : notificationRecipientSettings) {
+ *       if ("companyId".equals(setting.getName())) {
+ *           long companyId = GetterUtil.getLong(setting.getValue());
  *
- *   Role role = _roleLocalService.fetchRole(companyId, "Role Name");
+ *           Role role = _roleLocalService.fetchRole(companyId, "Role Name");
  *
- *   if (role != null) {
- *       List<User> users = userLocalService.getRoleUsers(role.getRoleId());
+ *           if (role != null) {
+ *               List<User> users = userLocalService.getRoleUsers(
+ *                   role.getRoleId());
  *
- *       if (!users.isEmpty()) {
- *           return new Object[] {users.get(0).getEmailAddress()};
+ *               if (!users.isEmpty()) {
+ *                   return new Object[] {
+ *                       users.get(0).getEmailAddress()
+ *                   };
+ *               }
+ *           }
  *       }
  *   }
  *
