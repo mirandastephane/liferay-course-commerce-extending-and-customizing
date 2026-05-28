@@ -43,23 +43,18 @@ import org.osgi.service.component.annotations.Reference;
  *       return TYPE_KEY;
  *   }
  *
- * Pattern 2 — Resolving a recipient from a role name:
+ * Pattern 2 — Resolving a recipient from an account ID:
  *
  *   for (NotificationRecipientSetting setting : notificationRecipientSettings) {
- *       if ("companyId".equals(setting.getName())) {
- *           long companyId = GetterUtil.getLong(setting.getValue());
+ *       if ("accountId".equals(setting.getName())) {
+ *           long accountEntryId = GetterUtil.getLong(setting.getValue());
  *
- *           Role role = _roleLocalService.fetchRole(companyId, "Role Name");
+ *           List<AccountEntryUserRel> rels =
+ *               _accountEntryUserRelLocalService
+ *                   .getAccountEntryUserRelsByAccountEntryId(accountEntryId);
  *
- *           if (role != null) {
- *               List<User> users = userLocalService.getRoleUsers(
- *                   role.getRoleId());
- *
- *               if (!users.isEmpty()) {
- *                   return new Object[] {
- *                       users.get(0).getEmailAddress()
- *                   };
- *               }
+ *           if (!rels.isEmpty()) {
+ *               return new Object[] {rels.get(0).getAccountUserId()};
  *           }
  *       }
  *   }
@@ -108,9 +103,10 @@ public class PrescriptionExpirationNotificationType
 	public Object[] toRecipients(
 		List<NotificationRecipientSetting> notificationRecipientSettings) {
 
-		// TODO 2: Look up the "Operations Manager" role by companyId.
-		// Return the email address of the first role member as a single-element
-		// Object array, or new Object[0] if the role has no members.
+		// TODO 2: Resolve the recipient's userId from the account ID.
+		// Use _accountEntryUserRelLocalService to get the account's users,
+		// then return the first user's userId as a single-element Object array,
+		// or new Object[0] if the account has no users.
 
 		return new Object[0];
 	}
