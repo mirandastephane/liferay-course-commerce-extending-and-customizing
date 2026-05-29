@@ -12,18 +12,20 @@ import com.liferay.notification.term.evaluator.NotificationTermEvaluatorTracker;
 import com.liferay.notification.type.BaseNotificationType;
 import com.liferay.notification.type.NotificationType;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.UserNotificationDeliveryConstants;
 import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.service.UserGroupLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.service.UserNotificationEventLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.Portal;
-import com.liferay.portal.kernel.util.Validator;
-
-import jakarta.mail.internet.InternetAddress;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,18 +45,23 @@ import org.osgi.service.component.annotations.Reference;
  *       return TYPE_KEY;
  *   }
  *
- * Pattern 2 — Resolving a recipient from an account ID:
+ * Pattern 2 — Resolving a recipient from a role name:
  *
  *   for (NotificationRecipientSetting setting : notificationRecipientSettings) {
- *       if ("accountId".equals(setting.getName())) {
- *           long accountEntryId = GetterUtil.getLong(setting.getValue());
+ *       if ("companyId".equals(setting.getName())) {
+ *           long companyId = GetterUtil.getLong(setting.getValue());
  *
- *           List<AccountEntryUserRel> rels =
- *               _accountEntryUserRelLocalService
- *                   .getAccountEntryUserRelsByAccountEntryId(accountEntryId);
+ *           Role role = _roleLocalService.fetchRole(companyId, "Role Name");
  *
- *           if (!rels.isEmpty()) {
- *               return new Object[] {rels.get(0).getAccountUserId()};
+ *           if (role != null) {
+ *               List<User> users = userLocalService.getRoleUsers(
+ *                   role.getRoleId());
+ *
+ *               if (!users.isEmpty()) {
+ *                   return new Object[] {
+ *                       users.get(0).getUserId()
+ *                   };
+ *               }
  *           }
  *       }
  *   }
@@ -115,7 +122,7 @@ public class PrescriptionExpirationNotificationType
 	public void sendNotification(NotificationContext notificationContext)
 		throws PortalException {
 
-		siteDefaultLocale = portal.getSiteDefaultLocale(0);
+		siteDefaultLocale = LocaleUtil.getDefault();
 
 		notificationContext.setType(TYPE_KEY);
 
@@ -153,39 +160,35 @@ public class PrescriptionExpirationNotificationType
 			notificationContext.getNotificationRecipientSettings());
 
 		for (Object recipient : recipients) {
-			String emailAddress = String.valueOf(recipient);
+			long recipientUserId = GetterUtil.getLong(recipient);
 
-			if (!Validator.isNotNull(emailAddress)) {
+			if (recipientUserId == 0) {
 				continue;
 			}
 
 			try {
-				MailMessage mailMessage = new MailMessage();
+				JSONObject payloadJSONObject = JSONFactoryUtil.createJSONObject();
 
-				mailMessage.setFrom(
-					new InternetAddress(
-						"noreply@clarityvisionsolutions.com",
-						"Clarity Vision Solutions"));
+				payloadJSONObject.put(
+					"classPK", notificationContext.getClassPK());
+				payloadJSONObject.put("subject", subject);
+				payloadJSONObject.put("body", body);
 
-				mailMessage.setTo(
-					new InternetAddress[] {new InternetAddress(emailAddress)});
-
-				mailMessage.setSubject(subject);
-				mailMessage.setBody(body);
-				mailMessage.setHTMLFormat(true);
-
-				_mailService.sendEmail(mailMessage);
+				_userNotificationEventLocalService.sendUserNotificationEvents(
+					recipientUserId, TYPE_KEY,
+					UserNotificationDeliveryConstants.TYPE_WEBSITE,
+					payloadJSONObject);
 
 				if (_log.isInfoEnabled()) {
 					_log.info(
-						"PrescriptionExpirationNotificationType: notification " +
-							"sent to " + emailAddress);
+						"PrescriptionExpirationNotificationType: user " +
+							"notification sent to userId=" + recipientUserId);
 				}
 			}
 			catch (Exception exception) {
 				_log.error(
 					"PrescriptionExpirationNotificationType: failed to send " +
-						"email to " + emailAddress,
+						"user notification to userId=" + recipientUserId,
 					exception);
 			}
 		}
@@ -248,9 +251,10 @@ public class PrescriptionExpirationNotificationType
 		PrescriptionExpirationNotificationType.class);
 
 	@Reference
-	private MailService _mailService;
+	private RoleLocalService _roleLocalService;
 
 	@Reference
-	private RoleLocalService _roleLocalService;
+	private UserNotificationEventLocalService
+		_userNotificationEventLocalService;
 
 }

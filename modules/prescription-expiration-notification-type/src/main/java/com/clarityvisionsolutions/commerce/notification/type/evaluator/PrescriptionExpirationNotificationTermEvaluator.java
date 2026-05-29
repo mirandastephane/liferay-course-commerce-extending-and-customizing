@@ -12,8 +12,11 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.osgi.service.component.annotations.Component;
@@ -56,34 +59,74 @@ public class PrescriptionExpirationNotificationTermEvaluator
 		}
 
 		if ("[%PRESCRIPTION_NUMBER%]".equals(termName)) {
-			return GetterUtil.getString(
-					_expandoValueLocalService.getData(
-							companyId, AccountEntry.class.getName(),
-							ExpandoTableConstants.DEFAULT_TABLE_NAME,
-							"prescriptionNumber", accountEntryId, ""));
+
+			// prescriptionNumber is a localized text field (String.localized);
+			// getData() must receive a Map default to match the column type.
+
+			@SuppressWarnings("unchecked")
+			Map<Locale, String> localizedData =
+				(Map<Locale, String>)_expandoValueLocalService.getData(
+					companyId, AccountEntry.class.getName(),
+					ExpandoTableConstants.DEFAULT_TABLE_NAME,
+					"prescriptionNumber", accountEntryId,
+					Collections.<Locale, String>emptyMap());
+
+			if (localizedData != null && !localizedData.isEmpty()) {
+				String value = localizedData.get(LocaleUtil.getDefault());
+
+				if (value != null) {
+					return value;
+				}
+
+				return localizedData.values().iterator().next();
+			}
+
+			return "";
 		}
 
 		if ("[%PRESCRIBING_DOCTOR%]".equals(termName)) {
-			return GetterUtil.getString(
-					_expandoValueLocalService.getData(
-							companyId, AccountEntry.class.getName(),
-							ExpandoTableConstants.DEFAULT_TABLE_NAME,
-							"prescribingDoctor", accountEntryId, ""));
+
+			// prescribingDoctor is a localized text field (String.localized)
+
+			Map<Locale, String> localizedData =
+				(Map<Locale, String>)_expandoValueLocalService.getData(
+					companyId, AccountEntry.class.getName(),
+					ExpandoTableConstants.DEFAULT_TABLE_NAME,
+					"prescribingDoctor", accountEntryId,
+					Collections.<Locale, String>emptyMap());
+
+			if (localizedData != null && !localizedData.isEmpty()) {
+				String value = localizedData.get(LocaleUtil.getDefault());
+
+				if (value != null) {
+					return value;
+				}
+
+				return localizedData.values().iterator().next();
+			}
+
+			return "";
 		}
 
 		if ("[%PRESCRIPTION_STATUS%]".equals(termName)) {
-			return GetterUtil.getString(
-					_expandoValueLocalService.getData(
-							companyId, AccountEntry.class.getName(),
-							ExpandoTableConstants.DEFAULT_TABLE_NAME,
-							"prescriptionStatus", accountEntryId, ""));
+
+			// prescriptionStatus is a dropdown field (String.array);
+			// getData() must receive a String[] default to match the column type.
+
+			String[] statusArray =
+				(String[])_expandoValueLocalService.getData(
+					companyId, AccountEntry.class.getName(),
+					ExpandoTableConstants.DEFAULT_TABLE_NAME,
+					"prescriptionStatus", accountEntryId, new String[0]);
+
+			return (statusArray != null && statusArray.length > 0)
+				? statusArray[0]
+				: "";
 		}
 
 		if ("[%EXPIRATION_DATE%]".equals(termName)) {
-
 			// TODO 3: Read the "expirationDate" Expando value for the
 			// AccountEntry and return it as a String.
-
 			return "";
 		}
 

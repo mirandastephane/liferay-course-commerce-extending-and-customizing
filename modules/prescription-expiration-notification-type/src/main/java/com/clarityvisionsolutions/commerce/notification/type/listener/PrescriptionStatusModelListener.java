@@ -6,10 +6,8 @@ import com.liferay.account.model.AccountEntryUserRel;
 import com.liferay.account.service.AccountEntryLocalService;
 import com.liferay.account.service.AccountEntryUserRelLocalService;
 import com.liferay.expando.kernel.model.ExpandoColumn;
-import com.liferay.expando.kernel.model.ExpandoTable;
 import com.liferay.expando.kernel.model.ExpandoValue;
 import com.liferay.expando.kernel.service.ExpandoColumnLocalService;
-import com.liferay.expando.kernel.service.ExpandoTableLocalService;
 import com.liferay.notification.context.NotificationContext;
 import com.liferay.notification.context.NotificationContextBuilder;
 import com.liferay.notification.model.NotificationTemplate;
@@ -19,7 +17,6 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.BaseModelListener;
 import com.liferay.portal.kernel.model.ModelListener;
-import com.liferay.portal.kernel.util.GetterUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -39,11 +36,22 @@ import org.osgi.service.component.annotations.Reference;
  * This prevents re-firing if the status is later updated while already at
  * "Expiring Soon", or when the account moves from "Expiring Soon" to "Expired".
  *
- * Listens on ExpandoValue rather than AccountEntry because the Headless API
- * updates Expando rows before touching AccountEntry, so an AccountEntry
- * ModelListener always sees the post-update Expando value for both old and new.
- * The ExpandoValue listener receives the genuine pre/post values via
- * originalValue and updatedValue.
+ * Uses an ExpandoValue ModelListener's onBeforeUpdate hook. At this point
+ * originalValue.getData() and updatedValue.getData() are in-memory model
+ * objects that hold the genuine old and new raw data strings respectively,
+ * without any database access. This is the only reliable hook for detecting
+ * the transition because the Accounts Admin portlet writes ExpandoValues
+ * BEFORE updating the AccountEntry, making AccountEntry-based listeners
+ * unable to observe the pre-update Expando state.
+ *
+ * For Dropdown (String[]) Expando columns, Liferay serialises the selected
+ * value using StringUtil.merge(), so a single-value dropdown stores its value
+ * as a plain string (e.g. "Active", "Expiring Soon"). Direct string equality
+ * on getData() is therefore reliable for this field.
+ *
+ * Error-handling contract:
+ *   onBeforeUpdate: any failure → log error, never re-throw.
+ *   A notification failure must never prevent the Expando update from persisting.
  */
 @Component(
 	service = ModelListener.class
@@ -52,34 +60,47 @@ public class PrescriptionStatusModelListener
 	extends BaseModelListener<ExpandoValue> {
 
 	@Override
-	public void onAfterUpdate(
+	public void onBeforeUpdate(
 			ExpandoValue originalValue, ExpandoValue updatedValue)
 		throws ModelListenerException {
 
 		try {
 			ExpandoColumn column = _expandoColumnLocalService.fetchExpandoColumn(
-				updatedValue.getColumnId());
+				originalValue.getColumnId());
 
-			if ((column == null) ||
+			if (column == null ||
 				!"prescriptionStatus".equals(column.getName())) {
 
 				return;
 			}
 
-			ExpandoTable table = _expandoTableLocalService.fetchExpandoTable(
-				updatedValue.getTableId());
+			String oldData = originalValue.getData();
+			String newData = updatedValue.getData();
 
-			if ((table == null) ||
-				!AccountEntry.class.getName().equals(table.getClassName())) {
+			if (_log.isInfoEnabled()) {
+				_log.info(
+					"PrescriptionStatusModelListener: prescriptionStatus " +
+						"update detected -> old=[" + oldData + "] new=[" +
+						newData + "]");
+			}
 
+			boolean wasExpiringSoon = "Expiring Soon".equals(oldData);
+			boolean isExpiringSoon = "Expiring Soon".equals(newData);
+
+			if (!isExpiringSoon || wasExpiringSoon) {
 				return;
 			}
 
-			String oldStatus = GetterUtil.getString(originalValue.getData());
-			String newStatus = GetterUtil.getString(updatedValue.getData());
+			long accountEntryId = updatedValue.getClassPK();
 
-			if (!"Expiring Soon".equals(newStatus) ||
-				"Expiring Soon".equals(oldStatus)) {
+			AccountEntry accountEntry =
+				_accountEntryLocalService.fetchAccountEntry(accountEntryId);
+
+			if (accountEntry == null) {
+				_log.warn(
+					"PrescriptionStatusModelListener: accountEntry not found " +
+						"for classPK=" + accountEntryId +
+						" \u2014 skipping notification");
 
 				return;
 			}
@@ -87,27 +108,22 @@ public class PrescriptionStatusModelListener
 			if (_log.isInfoEnabled()) {
 				_log.info(
 					"PrescriptionStatusModelListener: prescriptionStatus " +
-						"transitioned from \"" + oldStatus + "\" to \"" +
-						newStatus + "\" for accountEntryId=" +
-						updatedValue.getClassPK() +
-						" — dispatching notification");
-			}
-
-			AccountEntry accountEntry = _accountEntryLocalService.fetchAccountEntry(
-				updatedValue.getClassPK());
-
-			if (accountEntry == null) {
-				_log.warn(
-					"PrescriptionStatusModelListener: AccountEntry not found " +
-						"for accountEntryId=" + updatedValue.getClassPK());
-
-				return;
+						"transitioned to \"Expiring Soon\" for accountEntryId=" +
+						accountEntryId + " \u2014 dispatching notification");
 			}
 
 			_sendNotification(accountEntry);
 		}
 		catch (Exception exception) {
-			throw new ModelListenerException(exception);
+			_log.error(
+				"PrescriptionStatusModelListener: failed to process " +
+					"prescriptionStatus transition for columnId=" +
+					originalValue.getColumnId() +
+					" classPK=" + originalValue.getClassPK() +
+					" \u2014 Expando update will still be committed",
+				exception);
+
+			// Do not re-throw — a notification failure must not abort the update
 		}
 	}
 
@@ -129,7 +145,7 @@ public class PrescriptionStatusModelListener
 			_log.warn(
 				"PrescriptionStatusModelListener: no notification template " +
 					"found with ERC \"prescription-expiration-alert\" in " +
-					"companyId=" + companyId + " — skipping notification");
+					"companyId=" + companyId + " -> skipping notification");
 
 			return;
 		}
@@ -183,9 +199,6 @@ public class PrescriptionStatusModelListener
 
 	@Reference
 	private ExpandoColumnLocalService _expandoColumnLocalService;
-
-	@Reference
-	private ExpandoTableLocalService _expandoTableLocalService;
 
 	@Reference
 	private NotificationTemplateLocalService _notificationTemplateLocalService;
