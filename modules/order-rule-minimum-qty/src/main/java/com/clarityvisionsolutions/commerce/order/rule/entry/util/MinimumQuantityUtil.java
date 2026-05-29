@@ -1,4 +1,4 @@
-package com.clarityvisionsolutions.commerce.order.rule.entry.type.util;
+package com.clarityvisionsolutions.commerce.order.rule.entry.util;
 
 import com.liferay.commerce.order.rule.model.COREntry;
 import com.liferay.portal.kernel.util.GetterUtil;

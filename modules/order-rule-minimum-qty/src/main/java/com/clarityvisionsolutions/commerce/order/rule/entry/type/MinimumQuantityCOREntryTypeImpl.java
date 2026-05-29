@@ -1,6 +1,6 @@
 package com.clarityvisionsolutions.commerce.order.rule.entry.type;
 
-import com.clarityvisionsolutions.commerce.order.rule.entry.type.util.MinimumQuantityUtil;
+import com.clarityvisionsolutions.commerce.order.rule.entry.util.MinimumQuantityUtil;
 
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.model.CommerceOrderItem;
